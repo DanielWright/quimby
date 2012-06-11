@@ -17,10 +17,28 @@ describe Foursquare::VenueProxy do
       foursquare.venues.find('4ab7e57cf964a5205f7b20e3').id.should eql('4ab7e57cf964a5205f7b20e3')
     end
     
-    it "should include a :ll options in order to make a search" do
-      lambda { foursquare.venues.search() }.should raise_error(ArgumentError)
+    describe "#search's required arguments" do
+
+      context "without an :ll or :near option" do
+        it "raises an ArgumentError" do
+          lambda { foursquare.venues.search() }.should raise_error(ArgumentError)
+        end
+      end
+
+      context "with an :ll option" do
+        it "does not raise an exception" do
+          lambda { foursquare.venues.search(:ll => '40.7,-74') }.should_not raise_error(ArgumentError)
+        end
+      end
+
+      context "with an :near option" do
+        it "does not raise an exception" do
+          lambda { foursquare.venues.search(:near => 'New York City, NY') }.should_not raise_error(ArgumentError)
+        end
+      end
+
     end
-    
+
     it "should search for venues around the user (for checkin)" do
       foursquare.stub(:get).with("venues/search", {:ll => '40.7,-74'}).and_return(JSON.parse(get_file("spec/fixtures/venues/search/venues.json")))
       foursquare.venues.search(:ll => '40.7,-74').first.id.should eql("4eaf053bf5b99d2425f5bfa1")
